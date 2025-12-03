@@ -10,6 +10,7 @@ const errorHandler = require("./middleWare/errorMiddleware");
 const cookieParser = require("cookie-parser");
 const path = require('path');
 const encryption = require("./middleWare/encryptionMiddleware");
+const morgan = require("morgan");
 
      
 //
@@ -17,6 +18,7 @@ const app = express();
                                   
     
 // Middleware          
+app.use(morgan("dev"));
 app.use(encryption); 
 app.use(cookieParser()); 
 app.use(express.json());  
