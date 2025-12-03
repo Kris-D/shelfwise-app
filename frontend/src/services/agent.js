@@ -11,6 +11,7 @@ export const api = axios.create({
   headers: {
     "Content-Type": "text/plain",
     "x-encrypt-response": "true",
+    "x-encrypted-request": "true",
   },
 });
 
