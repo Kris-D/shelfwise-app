@@ -25,8 +25,7 @@ function getKey() {
 export const encryptRequest = (request) => {
   console.log("Data sent to encrypt:", request) ;
   const key = getKey();
-  // const parsedIV = Utf8.parse(InitVector);
-  const parsedIV = CryptoJS.enc.Base64.parse(InitVector)
+  const parsedIV = Utf8.parse(InitVector);
  
   // Encrypt
  const encrypted = AES.encrypt(JSON.stringify(request), key, {
@@ -45,8 +44,7 @@ export const encryptRequest = (request) => {
 export const decryptResponse = (response) => {
   // console.log("Response:", response) ;
  const key = getKey();
-  // const parsedIV = Utf8.parse(InitVector);
-  const parsedIV = CryptoJS.enc.Base64.parse(InitVector)
+  const parsedIV = Utf8.parse(InitVector);
   //  const encrypted = CryptoJS.lib.CipherParams.create({
   //   ciphertext: CryptoJS.enc.Base64.parse(response)
   // });
