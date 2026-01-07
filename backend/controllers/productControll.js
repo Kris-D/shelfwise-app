@@ -16,14 +16,14 @@ const createProduct = asyncHandler(async (req, res) => {
   // Handle Image Upload
   let fileData = {};
   if (req.file) {
-    // Image Upload to Cloudinary
+    // Image Upload to Cloudinary (Standard multipart)
     let uploadFile;
     try {
       uploadFile = await cloudinary.uploader.upload(req.file.path, {
         folder: "ShelfWise App",
         resource_type: "image",
       });
-      // console.log("CLOUDINARY UPLOAD ===>", uploadFile); 
+      console.log("CLOUDINARY UPLOAD FILE ===>", uploadFile); 
     } catch (error) {
       res.status(500);
       throw new Error("Image could not be uploaded");
@@ -35,7 +35,28 @@ const createProduct = asyncHandler(async (req, res) => {
       fileType: req.file.mimetype,
       fileSize: fileSizeFormatter(req.file.size, 2),
     };
-    // console.log("FINAL fileData ===>", fileData);
+  } else if (req.body.image && typeof req.body.image === 'string') {
+     // Image Upload to Cloudinary (Base64 from Encrypted Body)
+    let uploadFile;
+    try {
+      // Cloudinary handles Base64 strings automatically (data:image/...)
+      uploadFile = await cloudinary.uploader.upload(req.body.image, {
+        folder: "ShelfWise App",
+        resource_type: "image",
+      });
+      console.log("CLOUDINARY UPLOAD BASE64 ===>", uploadFile);
+    } catch (error) {
+       console.error("Cloudinary Base64 Upload Error:", error);
+      res.status(500);
+      throw new Error("Image could not be uploaded (Base64)");
+    }
+
+    fileData = {
+      fileName: "uploaded_image_" + Date.now(), // Fallback name
+      filePath: uploadFile.secure_url,
+      fileType: "image/jpeg", // Assume jpg or extract from data string if needed
+      fileSize: fileSizeFormatter(uploadFile.bytes, 2),
+    };
   }
 
   // create product here
@@ -114,15 +135,17 @@ const updateProduct = asyncHandler(async (req, res) => {
 
   // Handle Image Upload
   let fileData = {};
-
+console.log("REQ.FILE ===>", req.file);
+  
   if (req.file) {
-    // Image Upload to Cloudinary
+    // Image Upload to Cloudinary (Standard)
     let uploadFile;
     try {
       uploadFile = await cloudinary.uploader.upload(req.file.path, {
         folder: "ShelfWise App",
         resource_type: "image",
       });
+      console.log("CLOUDINARY UPLOAD FILE ===>", uploadFile);
     } catch (error) {
       res.status(500);
       throw new Error("Image could not be uploaded");
@@ -134,6 +157,31 @@ const updateProduct = asyncHandler(async (req, res) => {
       fileType: req.file.mimetype,
       fileSize: fileSizeFormatter(req.file.size, 2),
     };
+  } else if (req.body.image && typeof req.body.image === 'string' && req.body.image.startsWith('data:image')) {
+     // Image Upload to Cloudinary (Base64) - Check if it's a new image
+    let uploadFile;
+    try {
+      uploadFile = await cloudinary.uploader.upload(req.body.image, {
+        folder: "ShelfWise App",
+        resource_type: "image",
+      });
+      console.log("CLOUDINARY UPLOAD BASE64 ===>", uploadFile);
+    } catch (error) {
+       console.error("Cloudinary Base64 Update Error:", error);
+      res.status(500);
+      throw new Error("Image could not be uploaded (Base64)");
+    }
+
+    fileData = {
+      fileName: "uploaded_image_" + Date.now(),
+      filePath: uploadFile.secure_url,
+      fileType: "image/jpeg",
+      fileSize: fileSizeFormatter(uploadFile.bytes, 2),
+    };
+  } else {
+     // No new image uploaded, check if image is an object (existing image data)
+     // If req.body.image is the existing image object, we might just keep it?
+     // The Update logic below handles this usually by checking Object.keys(fileData).length
   }
 
   // update product here

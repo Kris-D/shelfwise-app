@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import { decryptResponse, encryptRequest } from "./cryptos";
-// import { formDataToEncryptedObject } from "./formDataToEncryptedObject";
+import { formDataToEncryptedObject } from "./formDataToEncryptedObject";
 
 export const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -50,10 +50,8 @@ const responseBody = (response) => decryptResponse(response.data);
 const requests = {
   get: (url) => api.get(url).then(responseBody),
   post: (url, body) => api.post(url, encryptRequest(body)).then(responseBody),
-  postwithformdata: (url, body) => api.post(url, body).then(responseBody),
   put: (url, body) => api.put(url, encryptRequest(body)).then(responseBody),
   patch: (url, body) => api.patch(url, encryptRequest(body)).then(responseBody),
-  patchwithformdata: (url, body) => api.patch(url, body).then(responseBody),
   delete: (url) => api.delete(url).then(responseBody),
 };
 
@@ -68,12 +66,17 @@ const auth = {
     requests.put(`/users/resetpassword/${resetToken}`, userData),
 };
 const product = {
-  createProduct: (formData) => requests.postwithformdata("/products", formData),
+  createProduct: async (formData) => {
+    const encrypted = await formDataToEncryptedObject(formData);
+    return api.post("/products", encrypted).then(responseBody);
+  },
   productList: () => requests.get("/products"),
   deleteProduct: (productId) => requests.delete(`/products/${productId}`),
   getSingleProduct: (productId) => requests.get(`/products/${productId}`),
-  editProduct: (productId, formData) =>
-    requests.patchwithformdata(`/products/${productId}`, formData),
+  editProduct: async (productId, formData) => {
+    const encrypted = await formDataToEncryptedObject(formData);
+    return api.patch(`/products/${productId}`, encrypted).then(responseBody);
+  },
 };
 const user = {
   userProfile: (userProfileData) =>

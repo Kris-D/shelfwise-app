@@ -19,9 +19,10 @@ const app = express();
     
 // Middleware          
 app.use(morgan("dev"));
-app.use(encryption); 
-app.use(cookieParser()); 
-app.use(express.json());  
+app.use(cookieParser());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.text({ limit: "50mb" })); // Parse text/plain for encrypted requests
+app.use(encryption); // Decrypt after parsing  
 //ok              
 // app.use(express.urlencoded({ extended: false }));          
 // app.use(bodyParser.json());

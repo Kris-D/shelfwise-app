@@ -33,6 +33,8 @@ const generateReferralCode = async (username) => {
 //   Create user
 const createUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
+  // console.log("reg:", { username, email, password });
+  
 
   //check if all fields are present
   if (!username || !email || !password) {
